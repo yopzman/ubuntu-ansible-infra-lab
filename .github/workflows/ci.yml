@@ -21,10 +21,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Install into the repo's collections dir so ANSIBLE_COLLECTIONS_PATH
+      # (a single override) covers both vendored and external collections.
       - name: Install tooling and collections
         run: |
           pip install ansible-core ansible-lint yamllint
-          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml -p ./collections
 
       - name: yamllint
         run: yamllint .
