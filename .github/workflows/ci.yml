@@ -29,10 +29,18 @@ jobs:
       - name: yamllint
         run: yamllint .
 
+      # ansible-lint runs syntax checks with cwd inside playbooks/, where the
+      # relative paths in ansible.cfg don't resolve — point it at the repo.
       - name: ansible-lint
         run: ansible-lint
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/collections
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/roles
 
       - name: Syntax-check all playbooks
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/collections
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/roles
         run: |
           for pb in playbooks/*.yml; do
             echo "::group::ansible-playbook --syntax-check $pb"
