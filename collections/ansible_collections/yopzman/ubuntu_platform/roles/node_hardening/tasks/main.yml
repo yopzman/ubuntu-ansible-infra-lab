@@ -6,14 +6,14 @@
 
 - name: Import swap-disabled tasks
   ansible.builtin.import_tasks: swap.yml
-  when: hardening_disable_swap | bool
+  when: node_hardening_disable_swap | bool
 
 - name: Import kernel module and sysctl tasks
   ansible.builtin.import_tasks: kernel.yml
 
 - name: Import UFW firewall tasks
   ansible.builtin.import_tasks: ufw.yml
-  when: hardening_ufw_enabled | bool
+  when: node_hardening_ufw_enabled | bool
 
 - name: Import SSH hardening tasks
   ansible.builtin.import_tasks: ssh.yml

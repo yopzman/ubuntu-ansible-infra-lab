@@ -31,26 +31,26 @@
 
 - name: Add Docker's official GPG key
   ansible.builtin.get_url:
-    url: "{{ docker_apt_key_url }}"
+    url: "{{ container_engine_apt_key_url }}"
     dest: /etc/apt/keyrings/docker.asc
     mode: "0644"
 
 - name: Add Docker apt repository
   ansible.builtin.apt_repository:
-    repo: "{{ docker_apt_repo }}"
+    repo: "{{ container_engine_apt_repo }}"
     state: present
     filename: docker
     update_cache: true
 
 - name: Install Docker Engine and plugins
   ansible.builtin.apt:
-    name: "{{ docker_packages }}"
+    name: "{{ container_engine_packages }}"
     state: present
 
 - name: Render docker daemon.json
   ansible.builtin.copy:
     dest: /etc/docker/daemon.json
-    content: "{{ docker_daemon_config | to_nice_json }}"
+    content: "{{ container_engine_daemon_config | to_nice_json }}"
     owner: root
     group: root
     mode: "0644"
@@ -67,7 +67,7 @@
     name: "{{ item }}"
     groups: docker
     append: true
-  loop: "{{ docker_users }}"
+  loop: "{{ container_engine_users }}"
   notify: Reset ansible connection for docker group
 
 - name: Enable and start Docker Engine

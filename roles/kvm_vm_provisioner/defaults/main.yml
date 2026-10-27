@@ -2,26 +2,33 @@
 # Defaults for the KVM VM provisioner role.
 
 # Base cloud image to download (Ubuntu 24.04 LTS "Noble" by default).
-kvm_cloud_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
-kvm_cloud_image_name: "noble-server-cloudimg-amd64.img"
-kvm_image_cache_dir: /var/lib/libvirt/images/base
+kvm_vm_provisioner_cloud_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+kvm_vm_provisioner_cloud_image_name: "noble-server-cloudimg-amd64.img"
+kvm_vm_provisioner_image_cache_dir: /var/lib/libvirt/images/base
 
 # Libvirt resources.
-kvm_storage_pool: default
-kvm_network: default
+kvm_vm_provisioner_storage_pool: default
+kvm_vm_provisioner_network: default
+
+# Static network config pushed via cloud-init network-config (v2).
+kvm_vm_provisioner_network_prefix: 24
+kvm_vm_provisioner_network_gateway: 192.168.122.1
+kvm_vm_provisioner_dns_servers:
+  - 1.1.1.1
+  - 8.8.8.8
 
 # VM sizing defaults (overridable per-node).
-kvm_vm_vcpu: 2
-kvm_vm_memory_mb: 2048
-kvm_vm_disk_gb: 20
+kvm_vm_provisioner_vm_vcpu: 2
+kvm_vm_provisioner_vm_memory_mb: 2048
+kvm_vm_provisioner_vm_disk_gb: 20
 
 # List of nodes to provision; each entry: { name, ip, mac }
-kvm_vms: []
+kvm_vm_provisioner_vms: []
 
 # Cloud-init guest config.
-kvm_vm_user: ubuntu
-kvm_vm_password_hash: ""          # optional; set to allow console login
-kvm_vm_hostname_prefix: ""
+kvm_vm_provisioner_vm_user: ubuntu
+kvm_vm_provisioner_vm_password_hash: ""          # optional; set to allow console login
+kvm_vm_provisioner_vm_hostname_prefix: ""
 
 # Where rendered cloud-init files live on the hypervisor.
-kvm_cloudinit_dir: /var/lib/libvirt/cloud-init
+kvm_vm_provisioner_cloudinit_dir: /var/lib/libvirt/cloud-init

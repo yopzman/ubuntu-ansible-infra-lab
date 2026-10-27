@@ -1,66 +1,94 @@
 ---
 # provision_vm.yml — per-VM tasks, executed with `vm` in scope.
 
-- name: "({{ vm.name }}) Define per-VM variables"
+- name: Define per-VM variables
   ansible.builtin.set_fact:
-    vm_hostname: "{{ kvm_vm_hostname_prefix | default('') }}{{ vm.name }}"
-    vm_disk_path: "{{ kvm_image_cache_dir }}/{{ vm.name }}.qcow2"
-    vm_userdata_path: "{{ kvm_cloudinit_dir }}/{{ vm.name }}-user-data"
-    vm_metadata_path: "{{ kvm_cloudinit_dir }}/{{ vm.name }}-meta-data"
+    kvm_vm_provisioner_vm_hostname: "{{ kvm_vm_provisioner_vm_hostname_prefix | default('') }}{{ vm.name }}"
+    kvm_vm_provisioner_vm_disk_path: "{{ kvm_vm_provisioner_image_cache_dir }}/{{ vm.name }}.qcow2"
+    kvm_vm_provisioner_vm_cloudinit_dir: "{{ kvm_vm_provisioner_cloudinit_dir }}/{{ vm.name }}"
+    kvm_vm_provisioner_vm_seed_iso: "{{ kvm_vm_provisioner_cloudinit_dir }}/{{ vm.name }}-seed.iso"
 
-- name: "({{ vm.name }}) Create overlay disk backed by the cloud image"
+- name: Create overlay disk backed by the cloud image
   ansible.builtin.command:
-    cmd: >
+    cmd: >-
       qemu-img create -f qcow2 -F qcow2
-      -b {{ kvm_image_cache_dir }}/{{ kvm_cloud_image_name }}
-      {{ vm_disk_path }} {{ kvm_vm_disk_gb }}G
-    creates: "{{ vm_disk_path }}"
+      -b {{ kvm_vm_provisioner_image_cache_dir }}/{{ kvm_vm_provisioner_cloud_image_name }}
+      {{ kvm_vm_provisioner_vm_disk_path }} {{ kvm_vm_provisioner_disk_gb }}G
+    creates: "{{ kvm_vm_provisioner_vm_disk_path }}"
   become: true
 
-- name: "({{ vm.name }}) Render cloud-init meta-data"
+- name: Create per-VM cloud-init config directory
+  ansible.builtin.file:
+    path: "{{ kvm_vm_provisioner_vm_cloudinit_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+# Filenames must be exactly user-data/meta-data/network-config: cloud-init's
+# NoCloud datasource only recognizes those names on the cidata volume.
+- name: Render cloud-init meta-data
   ansible.builtin.template:
     src: meta-data.j2
-    dest: "{{ vm_metadata_path }}"
+    dest: "{{ kvm_vm_provisioner_vm_cloudinit_dir }}/meta-data"
     owner: root
     group: root
     mode: "0644"
   become: true
-  vars:
-    vm_ip: "{{ vm.ip }}"
-    vm_mac: "{{ vm.mac }}"
+  register: kvm_vm_provisioner_metadata
 
-- name: "({{ vm.name }}) Render cloud-init user-data"
+- name: Render cloud-init user-data
   ansible.builtin.template:
     src: user-data.j2
-    dest: "{{ vm_userdata_path }}"
+    dest: "{{ kvm_vm_provisioner_vm_cloudinit_dir }}/user-data"
     owner: root
     group: root
     mode: "0600"
   become: true
-  vars:
-    vm_ip: "{{ vm.ip }}"
-    vm_mac: "{{ vm.mac }}"
+  register: kvm_vm_provisioner_userdata
 
-- name: "({{ vm.name }}) Build cloud-init seed ISO"
-  ansible.builtin.command:
-    cmd: >
-      genisoimage -output {{ kvm_cloudinit_dir }}/{{ vm.name }}-seed.iso
-      -volid cidata -joliet -rock
-      {{ vm_userdata_path }} {{ vm_metadata_path }}
-    creates: "{{ kvm_cloudinit_dir }}/{{ vm.name }}-seed.iso"
+- name: Render cloud-init network-config (static IP)
+  ansible.builtin.template:
+    src: network-config.j2
+    dest: "{{ kvm_vm_provisioner_vm_cloudinit_dir }}/network-config"
+    owner: root
+    group: root
+    mode: "0644"
   become: true
+  register: kvm_vm_provisioner_network_config
 
-- name: "({{ vm.name }}) Define the VM in libvirt"
+- name: Check for existing seed ISO
+  ansible.builtin.stat:
+    path: "{{ kvm_vm_provisioner_vm_seed_iso }}"
+  become: true
+  register: kvm_vm_provisioner_seed_iso_stat
+
+- name: Build cloud-init seed ISO
+  ansible.builtin.command:
+    cmd: >-
+      genisoimage -output {{ kvm_vm_provisioner_vm_seed_iso }}
+      -volid cidata -joliet -rock
+      {{ kvm_vm_provisioner_vm_cloudinit_dir }}/user-data
+      {{ kvm_vm_provisioner_vm_cloudinit_dir }}/meta-data
+      {{ kvm_vm_provisioner_vm_cloudinit_dir }}/network-config
+  become: true
+  # Rebuild only when a rendered file changed or the ISO is missing, so the
+  # ISO never goes stale but reruns stay idempotent.
+  when: >
+    kvm_vm_provisioner_userdata.changed or kvm_vm_provisioner_metadata.changed or
+    kvm_vm_provisioner_network_config.changed or not kvm_vm_provisioner_seed_iso_stat.stat.exists
+  register: kvm_vm_provisioner_seed_build
+  changed_when: kvm_vm_provisioner_seed_build.rc == 0
+
+- name: Define the VM in libvirt
   community.libvirt.virt:
     name: "{{ vm.name }}"
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'vm.xml.j2') }}"
   become: true
-  vars:
-    vm_ip: "{{ vm.ip }}"
-    vm_mac: "{{ vm.mac }}"
 
-- name: "({{ vm.name }}) Ensure the VM is running"
+- name: Ensure the VM is running
   community.libvirt.virt:
     name: "{{ vm.name }}"
     state: running

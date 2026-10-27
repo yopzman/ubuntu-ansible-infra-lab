@@ -7,5 +7,5 @@
 
   roles:
     - role: yopzman.ubuntu_platform.container_engine
-      docker_users:
+      container_engine_users:
         - "{{ ansible_user }}"

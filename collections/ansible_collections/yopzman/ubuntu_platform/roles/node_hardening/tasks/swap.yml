@@ -7,20 +7,20 @@
     swapon --show=NAME --noheadings | grep -v '^$' || true
   args:
     executable: /bin/bash
-  register: active_swap
+  register: node_hardening_active_swap
   changed_when: false
 
 - name: Disable all active swap
   ansible.builtin.command:
     cmd: "swapoff {{ item }}"
-  loop: "{{ active_swap.stdout_lines }}"
-  when: active_swap.stdout_lines | length > 0
-  register: swapoff_result
-  changed_when: swapoff_result.rc == 0
+  loop: "{{ node_hardening_active_swap.stdout_lines }}"
+  when: node_hardening_active_swap.stdout_lines | length > 0
+  register: node_hardening_swapoff_result
+  changed_when: node_hardening_swapoff_result.rc == 0
 
 - name: Remove swap entries from /etc/fstab
   ansible.posix.mount:
-    name: "{{ hardening_swapfile_path }}"
+    name: "{{ node_hardening_swapfile_path }}"
     fstype: swap
     state: absent
 

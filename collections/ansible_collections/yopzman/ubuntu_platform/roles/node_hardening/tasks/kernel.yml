@@ -5,7 +5,7 @@
   ansible.builtin.copy:
     dest: /etc/modules-load.d/hardening.conf
     content: |
-      {% for mod in hardening_kernel_modules %}
+      {% for mod in node_hardening_kernel_modules %}
       {{ mod }}
       {% endfor %}
     owner: root
@@ -17,7 +17,7 @@
   community.general.modprobe:
     name: "{{ item }}"
     state: present
-  loop: "{{ hardening_kernel_modules }}"
+  loop: "{{ node_hardening_kernel_modules }}"
 
 - name: Apply hardened sysctl parameters
   ansible.posix.sysctl:
@@ -26,4 +26,4 @@
     sysctl_set: true
     reload: true
     sysctl_file: /etc/sysctl.d/90-hardening.conf
-  loop: "{{ hardening_sysctl | dict2items }}"
+  loop: "{{ node_hardening_sysctl | dict2items }}"

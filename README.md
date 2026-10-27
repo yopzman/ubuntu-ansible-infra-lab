@@ -1,5 +1,7 @@
 # Ubuntu Ansible Infrastructure Lab 🚀
 
+[![CI](https://github.com/yopzman/ubuntu-ansible-infra-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/yopzman/ubuntu-ansible-infra-lab/actions/workflows/ci.yml)
+
 A **single-branch Ansible monorepo** that provisions KVM virtual machines on Ubuntu, hardens them for container workloads, and installs the Docker Engine — demonstrating the three core Ansible building blocks (standalone Role, custom Collection, and orchestration Playbooks) working together in one repository.
 
 ---
@@ -15,7 +17,8 @@ A **single-branch Ansible monorepo** that provisions KVM virtual machines on Ubu
               ┌─────────────────────────┴──────────────────────────┐
               │  01-provision-kvm.yml                              │
               │  roles/kvm_vm_provisioner                          │
-              │  ── cloud image + cloud-init (user-data/meta-data) │
+              │  ── cloud image + cloud-init (user-data, meta-data,│
+              │     network-config v2 with per-VM static IPs)      │
               │  ── qemu-img overlay disks + libvirt define/start  │
               └─────────────────────────┬──────────────────────────┘
                                         │  VMs boot with static IPs
@@ -43,6 +46,7 @@ A **single-branch Ansible monorepo** that provisions KVM virtual machines on Ubu
 .
 ├── ansible.cfg                  # roles_path + collections_paths prewired
 ├── requirements.yml             # external collections (libvirt, posix, docker, general)
+├── .github/workflows/ci.yml     # CI: yamllint + ansible-lint + syntax-check
 ├── inventory/
 │   ├── hosts.yml                # hypervisor + ubuntu_nodes groups
 │   └── group_vars/all.yml       # cloud image, VM specs, node list, SSH keys
@@ -51,15 +55,17 @@ A **single-branch Ansible monorepo** that provisions KVM virtual machines on Ubu
 │       ├── defaults/main.yml
 │       ├── meta/main.yml
 │       ├── tasks/               # main.yml + provision_vm.yml (per-VM loop)
-│       └── templates/           # user-data.j2, meta-data.j2, vm.xml.j2
+│       └── templates/           # user-data.j2, meta-data.j2, network-config.j2, vm.xml.j2
 ├── collections/
 │   └── ansible_collections/yopzman/ubuntu_platform/   # Component 2: collection
 │       ├── galaxy.yml
+│       ├── meta/runtime.yml
+│       ├── changelogs/          # antsibull-changelog config + release data
 │       └── roles/
 │           ├── node_hardening/  # swap, modules, sysctl, UFW, sshd
 │           └── container_engine/ # Docker CE, Compose, daemon.json
 └── playbooks/                   # Component 3: orchestration
-    ├── 01-provision-kvm.yml
+    ├── 01-provision-kvm.yml     # provision + wait_for_connection
     ├── 02-harden-nodes.yml
     ├── 03-deploy-containers.yml
     └── site.yml                 # master playbook (all three, in order)
@@ -67,7 +73,7 @@ A **single-branch Ansible monorepo** that provisions KVM virtual machines on Ubu
 
 ## 🛠️ Prerequisites
 
-* Control node: Ubuntu 22.04/24.04 with Ansible ≥ 2.14
+* Control node: Ubuntu 22.04/24.04 with Ansible ≥ 2.15
 * KVM/QEMU enabled on the hypervisor (`kvm-ok` should pass)
 * An SSH keypair at `~/.ssh/id_ed25519` (or export `SSH_PUBKEY`)
 * Libvirt `default` network with DHCP covering `192.168.122.0/24`
@@ -133,7 +139,8 @@ ansible-lint playbooks/ roles/ collections/ansible_collections/yopzman/
 ## ✅ Design Principles
 
 * **FQCN everywhere** — every module call uses its fully qualified name (`ansible.builtin.apt`, `community.libvirt.virt`, `ansible.posix.sysctl`, …)
-* **Idempotency** — `creates:` guards on shell steps, `state: present/absent` everywhere, handlers only fire on real changes
+* **Idempotency** — `creates:` guards on shell steps, seed ISOs rebuild only when their cloud-init files change, handlers only fire on real changes
+* **Lint-clean** — CI enforces `yamllint` + `ansible-lint` + playbook syntax checks on every push; role variables follow the `var-naming[no-role-prefix]` convention
 * **Single branch** — role, collection, and playbooks coexist and resolve locally through `ansible.cfg`
 
 ## 📄 License

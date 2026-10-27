@@ -1,0 +1,11 @@
+---
+ancestor: null
+releases:
+  1.0.0:
+    release_date: '2026-10-28'
+    changes:
+      release_summary: |-
+        Initial release of the yopzman.ubuntu_platform collection with the
+        ``node_hardening`` and ``container_engine`` roles.
+    modules: []
+    fragments: []

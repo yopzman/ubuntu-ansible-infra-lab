@@ -1,14 +1,14 @@
 ---
 # Defaults for node_hardening.
 
-hardening_disable_swap: true
-hardening_swapfile_path: /swap.img
+node_hardening_disable_swap: true
+node_hardening_swapfile_path: /swap.img
 
-hardening_kernel_modules:
+node_hardening_kernel_modules:
   - overlay
   - br_netfilter
 
-hardening_sysctl:
+node_hardening_sysctl:
   net.bridge.bridge-nf-call-iptables: 1
   net.bridge.bridge-nf-call-ip6tables: 1
   net.ipv4.ip_forward: 1
@@ -23,17 +23,19 @@ hardening_sysctl:
   kernel.dmesg_restrict: 1
 
 # UFW
-hardening_ufw_enabled: true
-hardening_ufw_default_incoming: deny
-hardening_ufw_default_outgoing: allow
-hardening_ufw_allow_rules:
-  - { port: 22,    proto: tcp, comment: "SSH" }
+node_hardening_ufw_enabled: true
+node_hardening_ufw_default_incoming: deny
+node_hardening_ufw_default_outgoing: allow
+node_hardening_ufw_allow_rules:
+  - port: 22
+    proto: tcp
+    comment: SSH
 
 # SSH (applied only when the key exists on the target)
-hardening_ssh_port: 22
-hardening_ssh_permit_root_login: "no"
-hardening_ssh_password_authentication: "no"
-hardening_ssh_x11_forwarding: "no"
-hardening_ssh_max_auth_tries: 3
-hardening_ssh_client_alive_interval: 300
-hardening_ssh_client_alive_count: 2
+node_hardening_ssh_port: 22
+node_hardening_ssh_permit_root_login: "no"
+node_hardening_ssh_password_authentication: "no"
+node_hardening_ssh_x11_forwarding: "no"
+node_hardening_ssh_max_auth_tries: 3
+node_hardening_ssh_client_alive_interval: 300
+node_hardening_ssh_client_alive_count: 2

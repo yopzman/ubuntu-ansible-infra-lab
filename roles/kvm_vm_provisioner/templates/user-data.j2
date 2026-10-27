@@ -1,16 +1,16 @@
 #jinja2: lstrip_blocks: True
 #cloud-config
-hostname: {{ vm_hostname | default(vm.name) }}
+hostname: {{ kvm_vm_provisioner_vm_hostname | default(vm.name) }}
 manage_etc_hosts: true
 users:
-  - name: {{ kvm_vm_user }}
+  - name: {{ kvm_vm_provisioner_vm_user }}
     gecos: Ansible Managed Node
     groups: [adm, sudo]
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     lock_passwd: true
-{% if kvm_vm_password_hash %}
-    passwd: {{ kvm_vm_password_hash }}
+{% if kvm_vm_provisioner_vm_password_hash %}
+    passwd: {{ kvm_vm_provisioner_vm_password_hash }}
     lock_passwd: false
 {% endif %}
 ssh_authorized_keys:

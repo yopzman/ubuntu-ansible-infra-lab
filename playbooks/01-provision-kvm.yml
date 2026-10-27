@@ -7,4 +7,14 @@
 
   roles:
     - role: kvm_vm_provisioner
-      kvm_vms: "{{ nodes }}"
+      kvm_vm_provisioner_vms: "{{ nodes }}"
+
+- name: Wait for provisioned VMs to finish first boot
+  hosts: ubuntu_nodes
+  gather_facts: false
+
+  tasks:
+    - name: Wait until SSH is reachable (first boot + cloud-init)
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+        delay: 5

@@ -1,0 +1,41 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tooling and collections
+        run: |
+          pip install ansible-core ansible-lint yamllint
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: yamllint
+        run: yamllint .
+
+      - name: ansible-lint
+        run: ansible-lint
+
+      - name: Syntax-check all playbooks
+        run: |
+          for pb in playbooks/*.yml; do
+            echo "::group::ansible-playbook --syntax-check $pb"
+            ansible-playbook "$pb" --syntax-check
+            echo "::endgroup::"
+          done

@@ -11,12 +11,12 @@
 - name: Set UFW default incoming policy
   community.general.ufw:
     direction: incoming
-    policy: "{{ hardening_ufw_default_incoming }}"
+    policy: "{{ node_hardening_ufw_default_incoming }}"
 
 - name: Set UFW default outgoing policy
   community.general.ufw:
     direction: outgoing
-    policy: "{{ hardening_ufw_default_outgoing }}"
+    policy: "{{ node_hardening_ufw_default_outgoing }}"
 
 - name: Apply UFW allow rules
   community.general.ufw:
@@ -24,7 +24,7 @@
     port: "{{ rule.port }}"
     proto: "{{ rule.proto }}"
     comment: "{{ rule.comment | default('') }}"
-  loop: "{{ hardening_ufw_allow_rules }}"
+  loop: "{{ node_hardening_ufw_allow_rules }}"
   loop_control:
     loop_var: rule
 

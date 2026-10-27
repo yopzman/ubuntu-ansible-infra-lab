@@ -1,2 +1,2 @@
 instance-id: {{ vm.name }}
-local-hostname: {{ vm_hostname | default(vm.name) }}
+local-hostname: {{ kvm_vm_provisioner_vm_hostname | default(vm.name) }}

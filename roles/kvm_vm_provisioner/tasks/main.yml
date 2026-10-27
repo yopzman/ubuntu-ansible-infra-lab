@@ -25,7 +25,7 @@
 
 - name: Ensure the default libvirt storage directory exists
   ansible.builtin.file:
-    path: "{{ kvm_image_cache_dir }}"
+    path: "{{ kvm_vm_provisioner_image_cache_dir }}"
     state: directory
     owner: root
     group: root
@@ -34,15 +34,15 @@
 
 - name: Download Ubuntu cloud image if missing
   ansible.builtin.get_url:
-    url: "{{ kvm_cloud_image_url }}"
-    dest: "{{ kvm_image_cache_dir }}/{{ kvm_cloud_image_name }}"
+    url: "{{ kvm_vm_provisioner_cloud_image_url }}"
+    dest: "{{ kvm_vm_provisioner_image_cache_dir }}/{{ kvm_vm_provisioner_cloud_image_name }}"
     mode: "0644"
   become: true
-  register: cloud_image_download
+  register: kvm_vm_provisioner_image_download
 
 - name: Ensure cloud-init render directory exists
   ansible.builtin.file:
-    path: "{{ kvm_cloudinit_dir }}"
+    path: "{{ kvm_vm_provisioner_cloudinit_dir }}"
     state: directory
     owner: root
     group: root
@@ -51,6 +51,7 @@
 
 - name: Render cloud-init files and create disks for each VM
   ansible.builtin.include_tasks: provision_vm.yml
-  loop: "{{ kvm_vms }}"
+  loop: "{{ kvm_vm_provisioner_vms }}"
   loop_control:
     loop_var: vm
+    label: "{{ vm.name }}"

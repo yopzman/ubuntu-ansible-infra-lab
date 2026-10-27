@@ -13,13 +13,13 @@
   ansible.builtin.copy:
     dest: /etc/ssh/sshd_config.d/60-hardening.conf
     content: |
-      Port {{ hardening_ssh_port }}
-      PermitRootLogin {{ hardening_ssh_permit_root_login }}
-      PasswordAuthentication {{ hardening_ssh_password_authentication }}
-      X11Forwarding {{ hardening_ssh_x11_forwarding }}
-      MaxAuthTries {{ hardening_ssh_max_auth_tries }}
-      ClientAliveInterval {{ hardening_ssh_client_alive_interval }}
-      ClientAliveCountMax {{ hardening_ssh_client_alive_count }}
+      Port {{ node_hardening_ssh_port }}
+      PermitRootLogin {{ node_hardening_ssh_permit_root_login }}
+      PasswordAuthentication {{ node_hardening_ssh_password_authentication }}
+      X11Forwarding {{ node_hardening_ssh_x11_forwarding }}
+      MaxAuthTries {{ node_hardening_ssh_max_auth_tries }}
+      ClientAliveInterval {{ node_hardening_ssh_client_alive_interval }}
+      ClientAliveCountMax {{ node_hardening_ssh_client_alive_count }}
     owner: root
     group: root
     mode: "0644"

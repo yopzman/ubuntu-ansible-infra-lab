@@ -1,0 +1,15 @@
+#jinja2: lstrip_blocks: True
+# Static addressing injected by kvm_vm_provisioner (NoCloud datasource).
+version: 2
+ethernets:
+  nic0:
+    match:
+      macaddress: "{{ vm.mac }}"
+    set-name: nic0
+    addresses:
+      - "{{ vm.ip }}/{{ kvm_network_prefix }}"
+    routes:
+      - to: default
+        via: "{{ kvm_network_gateway }}"
+    nameservers:
+      addresses: {{ kvm_dns_servers }}

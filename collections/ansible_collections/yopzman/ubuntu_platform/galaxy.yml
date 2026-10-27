@@ -1,3 +1,4 @@
+---
 namespace: yopzman
 name: ubuntu_platform
 version: 1.0.0
@@ -8,6 +9,9 @@ description: Roles for hardening Ubuntu nodes and managing container engines (Do
 license:
   - MIT
 tags:
+  - infrastructure
+  - linux
+  - security
   - ubuntu
   - hardening
   - docker

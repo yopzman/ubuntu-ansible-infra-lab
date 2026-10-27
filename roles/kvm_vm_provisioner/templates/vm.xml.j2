@@ -1,7 +1,7 @@
 <domain type="kvm">
   <name>{{ vm.name }}</name>
-  <memory unit="MiB">{{ kvm_vm_memory_mb }}</memory>
-  <vcpu placement="static">{{ kvm_vm_vcpu }}</vcpu>
+  <memory unit="MiB">{{ kvm_vm_provisioner_vm_memory_mb }}</memory>
+  <vcpu placement="static">{{ kvm_vm_provisioner_vm_vcpu }}</vcpu>
   <os>
     <type arch="x86_64" machine="q35">hvm</type>
     <boot dev="hd"/>
@@ -17,17 +17,17 @@
   <devices>
     <disk type="file" device="disk">
       <driver name="qemu" type="qcow2"/>
-      <source file="{{ vm_disk_path }}"/>
+      <source file="{{ kvm_vm_provisioner_vm_disk_path }}"/>
       <target dev="vda" bus="virtio"/>
     </disk>
     <disk type="file" device="cdrom">
       <driver name="qemu" type="iso"/>
-      <source file="{{ kvm_cloudinit_dir }}/{{ vm.name }}-seed.iso"/>
+      <source file="{{ kvm_vm_provisioner_vm_seed_iso }}"/>
       <target dev="sda" bus="sata"/>
       <readonly/>
     </disk>
     <interface type="network">
-      <source network="{{ kvm_network }}"/>
+      <source network="{{ kvm_vm_provisioner_network }}"/>
       <mac address="{{ vm.mac }}"/>
       <model type="virtio"/>
     </interface>
