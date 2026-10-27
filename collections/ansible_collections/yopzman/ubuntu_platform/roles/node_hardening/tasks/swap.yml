@@ -1,0 +1,32 @@
+---
+# swap.yml — disable swap at runtime and persistently.
+
+- name: Find active swap devices
+  ansible.builtin.shell: |
+    set -o pipefail
+    swapon --show=NAME --noheadings | grep -v '^$' || true
+  args:
+    executable: /bin/bash
+  register: active_swap
+  changed_when: false
+
+- name: Disable all active swap
+  ansible.builtin.command:
+    cmd: "swapoff {{ item }}"
+  loop: "{{ active_swap.stdout_lines }}"
+  when: active_swap.stdout_lines | length > 0
+  register: swapoff_result
+  changed_when: swapoff_result.rc == 0
+
+- name: Remove swap entries from /etc/fstab
+  ansible.posix.mount:
+    name: "{{ hardening_swapfile_path }}"
+    fstype: swap
+    state: absent
+
+- name: Remove any remaining swap lines from /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '^\s*[^#\s]+\s+\S+\s+swap\s'
+    state: absent
+    backup: true

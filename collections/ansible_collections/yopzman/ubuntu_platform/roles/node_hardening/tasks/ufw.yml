@@ -1,0 +1,33 @@
+---
+# ufw.yml — firewall baseline with UFW.
+
+- name: Install ufw
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Set UFW default incoming policy
+  community.general.ufw:
+    direction: incoming
+    policy: "{{ hardening_ufw_default_incoming }}"
+
+- name: Set UFW default outgoing policy
+  community.general.ufw:
+    direction: outgoing
+    policy: "{{ hardening_ufw_default_outgoing }}"
+
+- name: Apply UFW allow rules
+  community.general.ufw:
+    rule: allow
+    port: "{{ rule.port }}"
+    proto: "{{ rule.proto }}"
+    comment: "{{ rule.comment | default('') }}"
+  loop: "{{ hardening_ufw_allow_rules }}"
+  loop_control:
+    loop_var: rule
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled

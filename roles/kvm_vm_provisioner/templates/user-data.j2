@@ -1,0 +1,27 @@
+#jinja2: lstrip_blocks: True
+#cloud-config
+hostname: {{ vm_hostname | default(vm.name) }}
+manage_etc_hosts: true
+users:
+  - name: {{ kvm_vm_user }}
+    gecos: Ansible Managed Node
+    groups: [adm, sudo]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+{% if kvm_vm_password_hash %}
+    passwd: {{ kvm_vm_password_hash }}
+    lock_passwd: false
+{% endif %}
+ssh_authorized_keys:
+{% for key in ssh_public_keys %}
+  - {{ key }}
+{% endfor %}
+ssh_pwauth: false
+package_update: true
+packages:
+  - qemu-guest-agent
+  - python3
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+final_message: "cloud-init completed after $UPTIME seconds — {{ vm.name }} ready at {{ vm.ip }}"

@@ -1,0 +1,49 @@
+<domain type="kvm">
+  <name>{{ vm.name }}</name>
+  <memory unit="MiB">{{ kvm_vm_memory_mb }}</memory>
+  <vcpu placement="static">{{ kvm_vm_vcpu }}</vcpu>
+  <os>
+    <type arch="x86_64" machine="q35">hvm</type>
+    <boot dev="hd"/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <clock offset="utc"/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2"/>
+      <source file="{{ vm_disk_path }}"/>
+      <target dev="vda" bus="virtio"/>
+    </disk>
+    <disk type="file" device="cdrom">
+      <driver name="qemu" type="iso"/>
+      <source file="{{ kvm_cloudinit_dir }}/{{ vm.name }}-seed.iso"/>
+      <target dev="sda" bus="sata"/>
+      <readonly/>
+    </disk>
+    <interface type="network">
+      <source network="{{ kvm_network }}"/>
+      <mac address="{{ vm.mac }}"/>
+      <model type="virtio"/>
+    </interface>
+    <serial type="pty">
+      <target port="0"/>
+    </serial>
+    <console type="pty">
+      <target type="serial" port="0"/>
+    </console>
+    <channel type="unix">
+      <target type="virtio" name="org.qemu.guest_agent.0"/>
+    </channel>
+    <input type="tablet" bus="usb"/>
+    <graphics type="vnc" port="-1" autoport="yes" listen="127.0.0.1"/>
+    <video>
+      <model type="virtio"/>
+    </video>
+  </devices>
+</domain>

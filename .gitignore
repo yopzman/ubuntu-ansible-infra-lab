@@ -1,0 +1,11 @@
+# Ansible runtime artifacts
+collections/ansible_collections/*
+!collections/ansible_collections/yopzman/
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+
+# Retry files
+*.retry

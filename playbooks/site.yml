@@ -1,0 +1,10 @@
+---
+# site.yml — master orchestration: provision -> harden -> containerize.
+- name: Full Ubuntu platform rollout
+  ansible.builtin.import_playbook: 01-provision-kvm.yml
+
+- name: Harden provisioned nodes
+  ansible.builtin.import_playbook: 02-harden-nodes.yml
+
+- name: Deploy container engine
+  ansible.builtin.import_playbook: 03-deploy-containers.yml

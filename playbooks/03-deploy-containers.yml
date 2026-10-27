@@ -1,0 +1,11 @@
+---
+# 03-deploy-containers.yml — install Docker on the target nodes.
+- name: Deploy container engine to nodes
+  hosts: ubuntu_nodes
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: yopzman.ubuntu_platform.container_engine
+      docker_users:
+        - "{{ ansible_user }}"

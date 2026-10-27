@@ -1,0 +1,29 @@
+---
+# kernel.yml — load required kernel modules and apply sysctl parameters.
+
+- name: Ensure kernel modules load at boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/hardening.conf
+    content: |
+      {% for mod in hardening_kernel_modules %}
+      {{ mod }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart sysctl
+
+- name: Load kernel modules now
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ hardening_kernel_modules }}"
+
+- name: Apply hardened sysctl parameters
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    reload: true
+    sysctl_file: /etc/sysctl.d/90-hardening.conf
+  loop: "{{ hardening_sysctl | dict2items }}"

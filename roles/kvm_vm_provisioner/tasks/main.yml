@@ -1,0 +1,56 @@
+---
+# tasks/main.yml — KVM/QEMU VM provisioning on Ubuntu
+
+- name: Install KVM/libvirt packages
+  ansible.builtin.apt:
+    name:
+      - qemu-kvm
+      - libvirt-daemon-system
+      - libvirt-clients
+      - virtinst
+      - cloud-image-utils
+      - genisoimage
+      - bridge-utils
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Enable and start libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd
+    state: started
+    enabled: true
+  become: true
+
+- name: Ensure the default libvirt storage directory exists
+  ansible.builtin.file:
+    path: "{{ kvm_image_cache_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Download Ubuntu cloud image if missing
+  ansible.builtin.get_url:
+    url: "{{ kvm_cloud_image_url }}"
+    dest: "{{ kvm_image_cache_dir }}/{{ kvm_cloud_image_name }}"
+    mode: "0644"
+  become: true
+  register: cloud_image_download
+
+- name: Ensure cloud-init render directory exists
+  ansible.builtin.file:
+    path: "{{ kvm_cloudinit_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Render cloud-init files and create disks for each VM
+  ansible.builtin.include_tasks: provision_vm.yml
+  loop: "{{ kvm_vms }}"
+  loop_control:
+    loop_var: vm

@@ -1,0 +1,21 @@
+namespace: yopzman
+name: ubuntu_platform
+version: 1.0.0
+readme: README.md
+authors:
+  - Yovie Kobba (yopzman)
+description: Roles for hardening Ubuntu nodes and managing container engines (Docker).
+license:
+  - MIT
+tags:
+  - ubuntu
+  - hardening
+  - docker
+  - kubernetes
+  - containers
+repository: https://github.com/yopzman/ansible-infrastructure-automation
+dependencies:
+  ansible.posix: ">=1.5.0"
+  community.docker: ">=3.4.0"
+build_ignore:
+  - .git

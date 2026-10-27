@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  author: yopzman
+  description: Harden an Ubuntu node for Kubernetes/Docker workloads
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+
+dependencies: []

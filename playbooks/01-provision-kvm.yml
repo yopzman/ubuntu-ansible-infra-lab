@@ -1,0 +1,10 @@
+---
+# 01-provision-kvm.yml — create KVM VMs on the hypervisor.
+- name: Provision KVM virtual machines
+  hosts: hypervisor
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: kvm_vm_provisioner
+      kvm_vms: "{{ nodes }}"

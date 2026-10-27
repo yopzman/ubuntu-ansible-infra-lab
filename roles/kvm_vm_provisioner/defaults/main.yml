@@ -1,0 +1,27 @@
+---
+# Defaults for the KVM VM provisioner role.
+
+# Base cloud image to download (Ubuntu 24.04 LTS "Noble" by default).
+kvm_cloud_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+kvm_cloud_image_name: "noble-server-cloudimg-amd64.img"
+kvm_image_cache_dir: /var/lib/libvirt/images/base
+
+# Libvirt resources.
+kvm_storage_pool: default
+kvm_network: default
+
+# VM sizing defaults (overridable per-node).
+kvm_vm_vcpu: 2
+kvm_vm_memory_mb: 2048
+kvm_vm_disk_gb: 20
+
+# List of nodes to provision; each entry: { name, ip, mac }
+kvm_vms: []
+
+# Cloud-init guest config.
+kvm_vm_user: ubuntu
+kvm_vm_password_hash: ""          # optional; set to allow console login
+kvm_vm_hostname_prefix: ""
+
+# Where rendered cloud-init files live on the hypervisor.
+kvm_cloudinit_dir: /var/lib/libvirt/cloud-init

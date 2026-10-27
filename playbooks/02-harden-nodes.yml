@@ -1,0 +1,9 @@
+---
+# 02-harden-nodes.yml — harden the provisioned Ubuntu nodes.
+- name: Harden Ubuntu nodes
+  hosts: ubuntu_nodes
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: yopzman.ubuntu_platform.node_hardening

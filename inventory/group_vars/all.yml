@@ -1,0 +1,31 @@
+---
+# Global variables shared across all hosts and playbooks.
+
+ansible_user: ubuntu
+ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+
+# Public SSH keys injected into cloud images and authorized for management.
+# Override with `ssh_public_keys` in extra-vars, or set the SSH_PUBKEY env var.
+ssh_public_keys:
+  - "{{ lookup('ansible.builtin.env', 'SSH_PUBKEY') | default('', true) }}"
+
+# Cloud image used by the KVM provisioner.
+cloud_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+cloud_image_name: "noble-server-cloudimg-amd64.img"
+
+libvirt_storage_pool: default
+libvirt_storage_dir: /var/lib/libvirt/images
+libvirt_network: default
+
+vm_spec:
+  vcpu: 2
+  memory_mb: 2048
+  disk_gb: 20
+
+nodes:
+  - name: node-01
+    ip: 192.168.122.11
+    mac: "52:54:00:11:22:11"
+  - name: node-02
+    ip: 192.168.122.12
+    mac: "52:54:00:11:22:12"

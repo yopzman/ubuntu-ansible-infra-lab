@@ -1,0 +1,27 @@
+---
+# ssh.yml — sshd hardening via drop-in config.
+
+- name: Ensure sshd_config.d directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Apply hardened sshd settings
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/60-hardening.conf
+    content: |
+      Port {{ hardening_ssh_port }}
+      PermitRootLogin {{ hardening_ssh_permit_root_login }}
+      PasswordAuthentication {{ hardening_ssh_password_authentication }}
+      X11Forwarding {{ hardening_ssh_x11_forwarding }}
+      MaxAuthTries {{ hardening_ssh_max_auth_tries }}
+      ClientAliveInterval {{ hardening_ssh_client_alive_interval }}
+      ClientAliveCountMax {{ hardening_ssh_client_alive_count }}
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart sshd
